@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pointeuse Apprenti</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f0f0f;
+    color:white;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+header{
+    padding:20px;
+}
+
+h1{
+    color:#f5a623;
+}
+
+.tabs{
+    display:flex;
+    border-top:1px solid #333;
+    border-bottom:1px solid #333;
+}
+
+.tab{
+    flex:1;
+    text-align:center;
+    padding:15px;
+    cursor:pointer;
+    color:#999;
+    font-weight:bold;
+}
+
+.tab.active{
+    color:#f5a623;
+    border-bottom:3px solid #f5a623;
+}
+
+.page{
+    display:none;
+    padding:20px;
+}
+
+.page.active{
+    display:block;
+}
+
+.card{
+    background:#1b1b1b;
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    margin-top:10px;
+    background:#2a2a2a;
+    color:white;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:15px;
+    border:none;
+    border-radius:12px;
+    background:#f5a623;
+    color:white;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🕒 Pointeuse Apprenti</h1>
+    <p id="heureDirect"
+       style="
+       font-size:24px;
+       color:#f5a623;
+       margin-top:10px;
+       font-weight:bold;">
+    </p>
+</header>
+
+<div class="tabs">
+    <div class="tab active" onclick="openTab('pointage',this)">POINTAGE</div>
+    <div class="tab" onclick="openTab('historique',this)">HISTORIQUE</div>
+    <div class="tab" onclick="openTab('recap',this)">RÉCAP</div>
+    <div class="tab" onclick="openTab('reglage',this)">RÉGLAGES</div>
+</div>
+
+<div id="pointage" class="page active">
+
+    <div class="card">
+        <h2>Pointage</h2>
+
+        <button onclick="entree()">
+            📥 Pointer Entrée
+        </button>
+
+        <button onclick="sortie()">
+            📤 Pointer Sortie
+        </button>
+
+        <p id="etat"></p>
+    </div>
+
+</div>
+
+<div id="historique" class="page">
+
+    <div class="card">
+        <h2>Historique</h2>
+
+        <ul id="historiqueListe"></ul>
+    </div>
+
+</div>
+
+<div id="recap" class="page">
+
+    <div class="card">
+        <h2>Récapitulatif</h2>
+
+        <p>Total heures : <span id="total">0</span></p>
+
+        <p>Heures normales : <span id="normales">0</span></p>
+
+        <p>Heures complémentaires : <span id="complementaires">0</span></p>
+
+        <p>Heures supplémentaires : <span id="supplementaires">0</span></p>
+    </div>
+
+</div>
+
+<div id="reglage" class="page">
+
+    <div class="card">
+
+        <h2>Réglages</h2>
+
+        <label>Limite journalière</label>
+        <input type="number" value="10">
+
+        <label>Limite mensuelle</label>
+        <input type="number" value="151.67">
+
+        <label>Contrat hebdomadaire</label>
+        <input type="number" value="35">
+
+    </div>
+
+</div>
+
+<script>
+
+function afficherHeure() {
+
+    const maintenant = new Date();
+
+    const optionsDate = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    };
+
+    const date =
+        maintenant.toLocaleDateString('fr-FR', optionsDate);
+
+    const heure =
+        maintenant.toLocaleTimeString('fr-FR');
+
+    document.getElementById("heureDirect").innerHTML =
+        "📅 " + date + " | 🕒 " + heure;
+}
+
+setInterval(afficherHeure, 1000);
+
+afficherHeure();
+}
+
+function sortie(){
+
+    if(!debut){
+        alert("Aucune entrée enregistrée");
+        return;
+    }
+
+    let fin = new Date();
+
+    let heures =
+        (fin - debut) / 1000 / 60 / 60;
+
+    let li = document.createElement("li");
+
+    li.innerHTML =
+        new Date().toLocaleDateString() +
+        " - " +
+        heures.toFixed(2) +
+        " h";
+
+    document.getElementById("historiqueListe")
+        .appendChild(li);
+
+    calculRecap(heures);
+
+    document.getElementById("etat").innerHTML =
+        "Sortie : " + fin.toLocaleTimeString();
+}
+
+let total = 0;
+
+function calculRecap(h){
+
+    total += h;
+
+    let normales = Math.min(total,35);
+
+    let complementaires =
+        Math.max(0,Math.min(total-35,4));
+
+    let supplementaires =
+        Math.max(0,total-39);
+
+    document.getElementById("total")
+        .innerHTML = total.toFixed(2);
+
+    document.getElementById("normales")
+        .innerHTML = normales.toFixed(2);
+
+    document.getElementById("complementaires")
+        .innerHTML = complementaires.toFixed(2);
+
+    document.getElementById("supplementaires")
+        .innerHTML = supplementaires.toFixed(2);
+}
+
+function openTab(id,element){
+
+    document
+    .querySelectorAll(".page")
+    .forEach(x=>x.classList.remove("active"));
+
+    document
+    .querySelectorAll(".tab")
+    .forEach(x=>x.classList.remove("active"));
+
+    document
+    .getElementById(id)
+    .classList.add("active");
+
+    element.classList.add("active");
+}
+
+</script>
+
+</body>
+</html>
